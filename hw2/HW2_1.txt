@@ -1,0 +1,46 @@
+%{
+    int bcount=0;
+    int i;
+    void printb(){
+        for(i=0;i<bcount;i++){printf("\t");}
+    }
+%}
+
+
+%%
+
+^\{    {printb();bcount++;ECHO;}
+\{     {bcount++;ECHO;}
+^\}    {bcount--;printb();ECHO;}
+\}     {bcount--;ECHO;}
+
+^. {printb();ECHO;}
+
+
+%%
+int main(int argc, char *argv[]){
+    yylex();
+    return(0);
+}
+
+
+
+
+
+
+
+
+指令
+轉成.c
+flex -o lex.yy.c code.l
+編譯
+gcc -o code lex.yy.c -lfl
+餵輸入
+cat input1.txt | ./code
+./code < input1.txt
+
+掛載
+sudo mount -t vboxsf HW2_1 /home/user/Desktop/share
+
+
+
