@@ -1,0 +1,68 @@
+%{
+    int donothing=0;
+    int ifflag,ifstate=0;
+    void printif(){
+        if(ifflag==0){printf("False:");}
+  	else{printf("True:");}
+    }
+    void ignoretab(){
+	if(ifstate==1){inifmulend=1;}
+    }
+%}
+%x Singleline
+singlestart [//]+
+
+%x Mulline
+mulstart [/*]{2}
+mulend [*/]{2}
+mulinifend [\t*/]{3}
+
+%x Output
+string ["][^"]+["]
+int [0-9]+
+cout [cout\ <<\ ]{8}
+endl [endl]{4}
+endsta [;]
+
+iftrue [if(true)\ ]{9}
+iffalse [if(false)\ ]{10}
+
+%%
+{cout} {printf("print(");BEGIN Output;}
+<Output>{string} {ECHO;}
+<Output>{int} {ECHO;}
+<Output>{endsta} {printf(")");BEGIN INITIAL;}
+<Output>. {donothing++;}
+
+{singlestart} {printf("#"); BEGIN Singleline;}
+<Singleline>.+ {ECHO;BEGIN INITIAL;}
+
+{mulstart} {printf("\"\"\""); BEGIN Mulline;}
+<Mulline>{mulend} {printf("\"\"\""); BEGIN INITIAL;}
+<Mulline>{mulinifend} {printf("\t\"\"\""); BEGIN INITIAL;}
+<Mulline>.+ {ECHO;}
+
+{iftrue} {printf("if "); ifflag=1; printif();}
+{iffalse} {printf("if "); ifflag=0; printif();}
+\{ {ifstate=1;}
+\} {ifstate=0;}
+
+
+%%
+int main(int argc, char *argv[]){
+    yylex();
+    return(0);
+}
+
+
+指令
+轉成.c
+flex -o lex.yy.c codeA.l
+編譯
+gcc -o codeA lex.yy.c -lfl
+餵輸入
+cat input1.txt | ./codeA
+./codeA < input1.txt
+
+掛載
+sudo mount -t vboxsf HW2_1 /home/user/Desktop/share
